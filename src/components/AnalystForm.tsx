@@ -47,15 +47,16 @@ export const AnalystForm: React.FC<AnalystFormProps> = ({ onBack }) => {
 
   if (view === 'menu') {
     return (
-      <div className="min-h-screen bg-slate-100 p-4 md:p-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center mb-8">
-            <button onClick={onBack} className="mr-4 p-2 hover:bg-white rounded-full transition-colors">
-              <ArrowLeft className="w-6 h-6 text-slate-600" />
-            </button>
-            <h1 className="text-3xl font-black text-slate-800 uppercase tracking-tight">Panel de Analista</h1>
+      <div className="min-h-screen bg-slate-100 pb-24">
+        {/* Header */}
+        <div className="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-40 shadow-sm">
+          <div className="max-w-4xl mx-auto">
+            <h1 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Panel de Analista</h1>
+            <p className="text-xs text-slate-400 mt-1">Herramientas de gestión y control</p>
           </div>
+        </div>
 
+        <main className="max-w-4xl mx-auto p-4 md:p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Botón 1: Inventario */}
             <button
@@ -109,6 +110,19 @@ export const AnalystForm: React.FC<AnalystFormProps> = ({ onBack }) => {
               </div>
               <h3 className="text-xl font-black text-slate-800 mb-2">Bitácora</h3>
               <p className="text-sm text-slate-500">Historial de eventos,  compromisos y comentarios.</p>
+            </button>
+          </div>
+        </main>
+
+        {/* Footer */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-3 shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.1)] z-50">
+          <div className="max-w-4xl mx-auto flex justify-start">
+            <button
+              onClick={onBack}
+              className="flex items-center justify-center text-slate-500 font-bold px-4 py-3 rounded-lg hover:bg-slate-100 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              <span className="text-sm uppercase tracking-wide">Volver</span>
             </button>
           </div>
         </div>
