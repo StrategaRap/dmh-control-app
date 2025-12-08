@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import type { ShiftReportData, HoleRecord } from '../types';
 import { ShiftType, TerrainType } from '../types';
-import { DRILL_OPTIONS, DIAMETER_OPTIONS, generateUUID } from '../constants';
-import { saveOperatorName, getSavedOperatorName, saveShiftReportLocally } from '../services/storageService';
+import { DRILL_OPTIONS, DIAMETER_OPTIONS, generateUUID, DEFAULT_API_URL } from '../constants';
+import { saveOperatorName, getSavedOperatorName, saveShiftReportLocally, getSavedScriptUrl, markShiftReportAsSynced } from '../services/storageService';
 import { HoleRow } from './HoleRow';
 import { PlusCircle, Save, Wrench, FileText, Activity, AlertCircle, Ruler } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
+import { uploadDataToSheet } from '../services/googleScriptService';
 
 interface ShiftFormProps {
   onNavigateToSteel: () => void;
@@ -202,9 +203,39 @@ export const ShiftForm: React.FC<ShiftFormProps> = ({ onNavigateToSteel, onNavig
 
     try {
       const reportToSave = JSON.parse(JSON.stringify(formData));
+
+      // 1. Guardar localmente primero
       saveShiftReportLocally(reportToSave);
 
-      alert("✅ REPORTE GUARDADO EN DISPOSITIVO\n\nPresiona 'Sincronizar' arriba para enviarlo a Excel/Correo.");
+      // 2. Intentar enviar si hay conexión
+      if (navigator.onLine) {
+        const scriptUrl = getSavedScriptUrl() || DEFAULT_API_URL;
+        if (scriptUrl && !scriptUrl.includes("INSERT_YOUR")) {
+          setIsSummarizing(true); // Reusamos estado de carga
+          const res = await uploadDataToSheet(reportToSave, null, null, null, scriptUrl);
+          setIsSummarizing(false);
+
+          if (res.success) {
+            markShiftReportAsSynced(reportToSave.id);
+            alert("✅ REPORTE GUARDADO Y SINCRONIZADO\n\nSe ha enviado el reporte y el correo.");
+
+            // Reset form
+            setFormData(prev => ({
+              ...prev,
+              id: generateUUID(),
+              holes: [],
+              aiSummary: undefined,
+            }));
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+          } else {
+            console.warn("Error sync:", res.message);
+          }
+        }
+      }
+
+      // 3. Fallback a local
+      alert("⚠️ REPORTE GUARDADO EN DISPOSITIVO (OFFLINE)\n\nPresiona 'Sincronizar' en Analista cuando tengas internet.");
 
       setFormData(prev => ({
         ...prev,
@@ -213,7 +244,9 @@ export const ShiftForm: React.FC<ShiftFormProps> = ({ onNavigateToSteel, onNavig
         aiSummary: undefined,
       }));
       window.scrollTo({ top: 0, behavior: 'smooth' });
+
     } catch (error) {
+      setIsSummarizing(false);
       alert(`❌ Error al guardar: ${error}`);
     }
   };

@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import type { SteelChangeData } from '../types';
 import { ShiftType, SteelType } from '../types';
-import { DRILL_OPTIONS, STEEL_OPTIONS, generateUUID } from '../constants';
-import { saveSteelChangeLocally } from '../services/storageService';
-import { ArrowLeft, Save } from 'lucide-react';
+import { DRILL_OPTIONS, STEEL_OPTIONS, generateUUID, DEFAULT_API_URL } from '../constants';
+import { saveSteelChangeLocally, getSavedScriptUrl, markSteelChangeAsSynced } from '../services/storageService';
+import { ArrowLeft, Save, RefreshCw } from 'lucide-react';
 
 interface SteelChangeFormProps {
     onBack: () => void;
 }
 
 export const SteelChangeForm: React.FC<SteelChangeFormProps> = ({ onBack }) => {
+    const [isSaving, setIsSaving] = useState(false);
     const [formData, setFormData] = useState<SteelChangeData>({
         id: generateUUID(),
         date: new Date().toISOString().split('T')[0],
@@ -25,13 +26,63 @@ export const SteelChangeForm: React.FC<SteelChangeFormProps> = ({ onBack }) => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!formData.serialNumber) {
             alert("Ingrese número de serie");
             return;
         }
+
+        setIsSaving(true);
+
+        // 1. Guardar localmente primero (como backup/pending)
         saveSteelChangeLocally(formData);
-        alert("Cambio de acero registrado localmente.");
+
+        // 2. Intentar enviar si hay conexión
+        if (navigator.onLine) {
+            try {
+                const scriptUrl = getSavedScriptUrl() || DEFAULT_API_URL;
+
+                if (!scriptUrl || scriptUrl.includes("INSERT_YOUR")) {
+                    throw new Error("URL de script no configurada");
+                }
+
+                const response = await fetch(scriptUrl, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        type: 'steel_change',
+                        data: formData
+                    }),
+                    redirect: "follow",
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8',
+                    },
+                });
+
+                if (response.ok) {
+                    const text = await response.text();
+                    // Verificar si es respuesta válida JSON
+                    try {
+                        const result = JSON.parse(text);
+                        if (result.success) {
+                            // Marcar como sincronizado
+                            markSteelChangeAsSynced(formData.id);
+                            alert("✅ Cambio registrado y sincronizado con la nube.");
+                            onBack();
+                            return;
+                        }
+                    } catch (e) {
+                        console.warn("Respuesta no JSON:", text);
+                    }
+                }
+            } catch (e) {
+                console.error("Error al sincronizar:", e);
+                // Fallar silenciosamente y mostrar mensaje de guardado local
+            }
+        }
+
+        // 3. Si falló la red o no hay conexión
+        alert("⚠️ Guardado LOCALMENTE. Sin conexión o error de red.\n\nRecuerda sincronizar desde el Inventario cuando tengas internet.");
+        setIsSaving(false);
         onBack();
     };
 
@@ -153,10 +204,20 @@ export const SteelChangeForm: React.FC<SteelChangeFormProps> = ({ onBack }) => {
 
                     <button
                         onClick={handleSave}
-                        className="flex items-center justify-center bg-brand-primary text-white font-bold px-6 py-3 rounded-lg shadow-lg hover:bg-blue-800 transition-all transform hover:scale-[1.02] active:scale-95 uppercase text-sm tracking-wide"
+                        disabled={isSaving}
+                        className="flex items-center justify-center bg-brand-primary text-white font-bold px-6 py-3 rounded-lg shadow-lg hover:bg-blue-800 transition-all transform hover:scale-[1.02] active:scale-95 uppercase text-sm tracking-wide disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <Save className="mr-2 w-5 h-5" />
-                        Guardar Registro
+                        {isSaving ? (
+                            <>
+                                <RefreshCw className="mr-2 w-5 h-5 animate-spin" />
+                                Guardando...
+                            </>
+                        ) : (
+                            <>
+                                <Save className="mr-2 w-5 h-5" />
+                                Guardar Registro
+                            </>
+                        )}
                     </button>
                 </div>
             </div>
