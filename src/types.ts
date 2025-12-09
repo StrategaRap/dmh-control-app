@@ -79,6 +79,8 @@ export interface SteelChangeData {
   shift: ShiftType;
   steelType: SteelType;
   serialNumber: string;
+  brand?: string;
+  model?: string;
   comments: string;
   status: 'pending' | 'synced';
 }

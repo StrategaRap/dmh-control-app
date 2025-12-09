@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import type { ShiftReportData, HoleRecord } from '../types';
-import { ShiftType, TerrainType } from '../types';
+import { ShiftType, TerrainType, Diameter } from '../types';
 import { DRILL_OPTIONS, DIAMETER_OPTIONS, generateUUID, DEFAULT_API_URL } from '../constants';
 import { saveOperatorName, getSavedOperatorName, saveShiftReportLocally, getSavedScriptUrl, markShiftReportAsSynced } from '../services/storageService';
 import { HoleRow } from './HoleRow';
@@ -53,6 +53,78 @@ export const ShiftForm: React.FC<ShiftFormProps> = ({ onNavigateToSteel, onNavig
       console.warn("Error loading operator name", e);
     }
   }, []);
+
+  // State for steel changes
+  const [steelChanges, setSteelChanges] = useState<any[]>([]);
+
+  // Fetch steel changes on mount
+  useEffect(() => {
+    const fetchSteelChanges = async () => {
+      if (navigator.onLine) {
+        try {
+          const scriptUrl = getSavedScriptUrl() || DEFAULT_API_URL;
+          if (scriptUrl && !scriptUrl.includes("INSERT_YOUR")) {
+            const response = await fetch(scriptUrl, {
+              method: 'POST',
+              body: JSON.stringify({ type: 'steel_changes_fetch' }),
+              redirect: "follow",
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+            });
+            const result = await response.json();
+            if (result.success) {
+              setSteelChanges(result.data);
+            }
+          }
+        } catch (e) {
+          console.error("Error fetching steel changes:", e);
+        }
+      }
+    };
+    fetchSteelChanges();
+  }, []);
+
+  // Autofill tricone data when drillId changes
+  useEffect(() => {
+    if (formData.drillId) {
+      // 1. Set Diameter based on Drill ID
+      let diameter = formData.bitDiameter;
+      const drillNum = parseInt(formData.drillId);
+
+      if (drillNum >= 101 && drillNum <= 106) {
+        diameter = Diameter.D10_58;
+      } else if (drillNum >= 111 && drillNum <= 112) {
+        diameter = Diameter.D7_78;
+      }
+
+      // 2. Autofill from Steel Changes
+      let triconeUpdates = {};
+      if (steelChanges.length > 0) {
+        // Filter for this drill and 'Tricono' component
+        const drillChanges = steelChanges.filter(c =>
+          c.drillId === formData.drillId &&
+          (c.component === 'Tricono')
+        );
+
+        // Sort by date descending to get the latest
+        drillChanges.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+        if (drillChanges.length > 0) {
+          const lastTricono = drillChanges[0];
+          triconeUpdates = {
+            bitBrand: lastTricono.brand || '',
+            bitModel: lastTricono.model || '',
+            bitSerial: lastTricono.serie || ''
+          };
+        }
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        bitDiameter: diameter,
+        ...triconeUpdates
+      }));
+    }
+  }, [formData.drillId, steelChanges]);
 
   // Función auxiliar para recalcular acumulados
   const recalculateCumulatives = (holes: HoleRecord[]): HoleRecord[] => {

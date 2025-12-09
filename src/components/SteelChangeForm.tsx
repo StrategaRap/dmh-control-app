@@ -16,8 +16,10 @@ export const SteelChangeForm: React.FC<SteelChangeFormProps> = ({ onBack }) => {
         date: new Date().toISOString().split('T')[0],
         shift: ShiftType.A,
         drillId: DRILL_OPTIONS[0],
-        steelType: SteelType.TRICONO,
+        steelType: SteelType.AMORTIGUADOR,
         serialNumber: '',
+        brand: '',
+        model: '',
         comments: '',
         status: 'pending'
     });
@@ -147,7 +149,7 @@ export const SteelChangeForm: React.FC<SteelChangeFormProps> = ({ onBack }) => {
                     <div className="bg-slate-50 border-b border-slate-200 px-5 py-3">
                         <h3 className="text-sm font-black text-slate-700 uppercase tracking-wide">Componente (Tipo de Acero)</h3>
                     </div>
-                    <div className="p-5">
+                    <div className="p-5 space-y-4">
                         <select
                             className="w-full border-slate-300 bg-white border p-3 rounded-lg shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                             value={formData.steelType}
@@ -155,6 +157,32 @@ export const SteelChangeForm: React.FC<SteelChangeFormProps> = ({ onBack }) => {
                         >
                             {STEEL_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
                         </select>
+
+                        {/* Campos adicionales para Tricono */}
+                        {formData.steelType === SteelType.TRICONO && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Marca</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Ej: Shareate"
+                                        className="w-full border-slate-300 bg-white border p-3 rounded-lg shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                        value={formData.brand || ''}
+                                        onChange={e => handleChange('brand', e.target.value)}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Modelo</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Ej: RR440"
+                                        className="w-full border-slate-300 bg-white border p-3 rounded-lg shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                        value={formData.model || ''}
+                                        onChange={e => handleChange('model', e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 

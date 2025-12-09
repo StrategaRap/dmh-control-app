@@ -100,12 +100,12 @@ function doPost(e) {
       }
 
       if (sheet.getLastRow() === 0) {
-        sheet.appendRow(["ID", "Fecha", "Perforadora", "Turno", "Tipo Acero", "Serie", "Comentarios"]);
-        sheet.getRange(1, 1, 1, 7).setFontWeight("bold").setBackground("#e2e8f0");
+        sheet.appendRow(["ID", "Fecha", "Perforadora", "Turno", "Tipo Acero", "Serie", "Comentarios", "Marca", "Modelo"]);
+        sheet.getRange(1, 1, 1, 9).setFontWeight("bold").setBackground("#e2e8f0");
       }
 
       sheet.appendRow([
-        data.id, data.date, data.drillId, data.shift, data.steelType, data.serialNumber, data.comments
+        data.id, data.date, data.drillId, data.shift, data.steelType, data.serialNumber, data.comments, data.brand || "", data.model || ""
       ]);
 
       // ==========================================
@@ -316,15 +316,17 @@ function doPost(e) {
       let changes = [];
 
       if (sheet && sheet.getLastRow() > 1) {
-        // Columnas: A=ID, B=Fecha, C=Perforadora, D=Turno, E=Tipo Acero, F=Serie
-        const dataRange = sheet.getRange(2, 1, sheet.getLastRow() - 1, 6);
+        // Columnas: A=ID, B=Fecha, C=Perforadora, D=Turno, E=Tipo Acero, F=Serie, G=Comentarios, H=Marca, I=Modelo
+        const dataRange = sheet.getRange(2, 1, sheet.getLastRow() - 1, 9);
         const data = dataRange.getValues();
 
         changes = data.map(row => ({
           drillId: String(row[2]),   // Columna C = Perforadora
           date: row[1],              // Columna B = Fecha
           component: row[4],         // Columna E = Tipo Acero
-          serie: row[5] || ''        // Columna F = Serie
+          serie: row[5] || '',       // Columna F = Serie
+          brand: row[7] || '',       // Columna H = Marca
+          model: row[8] || ''        // Columna I = Modelo
         }));
       }
 
