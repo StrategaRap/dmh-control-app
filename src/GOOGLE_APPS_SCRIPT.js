@@ -123,16 +123,18 @@ function doPost(e) {
           "ID", "Fecha", "Turno", "Perforadora",
           "Barra Seg. Sup", "Barra Seg. Med", "Barra Seg. Inf",
           "Barra Pat. Sup", "Barra Pat. Med", "Barra Pat. Inf",
-          "Adapt. Inf. Med"
+          "Adapt. Inf. Med",
+          "Barra Seg. 2 Sup", "Barra Seg. 2 Med", "Barra Seg. 2 Inf"
         ]);
-        sheet.getRange(1, 1, 1, 11).setFontWeight("bold").setBackground("#e2e8f0");
+        sheet.getRange(1, 1, 1, 14).setFontWeight("bold").setBackground("#e2e8f0");
       }
 
       sheet.appendRow([
         data.id, data.date, data.shift, data.drillId,
         data.barraSeguidoraSuperior, data.barraSeguidoraMedio, data.barraSeguidoraInferior,
         data.barraPatéraSuperior, data.barraPatéraMedio, data.barraPatéraInferior,
-        data.adaptadorInferiorMedio
+        data.adaptadorInferiorMedio,
+        data.barraSeguidora2Superior || "", data.barraSeguidora2Medio || "", data.barraSeguidora2Inferior || ""
       ]);
 
       // ==========================================
@@ -185,7 +187,7 @@ function doPost(e) {
       let measurements = [];
 
       if (sheet && sheet.getLastRow() > 1) {
-        const dataRange = sheet.getRange(2, 1, sheet.getLastRow() - 1, 11);
+        const dataRange = sheet.getRange(2, 1, sheet.getLastRow() - 1, 14);
         const data = dataRange.getValues();
 
         measurements = data.map(row => ({
@@ -199,7 +201,10 @@ function doPost(e) {
           barraPatéraSuperior: String(row[7] || ''),
           barraPatéraMedio: String(row[8] || ''),
           barraPatéraInferior: String(row[9] || ''),
-          adaptadorInferiorMedio: String(row[10] || '')
+          adaptadorInferiorMedio: String(row[10] || ''),
+          barraSeguidora2Superior: String(row[11] || ''),
+          barraSeguidora2Medio: String(row[12] || ''),
+          barraSeguidora2Inferior: String(row[13] || '')
         }));
       }
 

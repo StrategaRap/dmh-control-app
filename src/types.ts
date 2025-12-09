@@ -93,6 +93,9 @@ export interface MeasurementData {
   barraSeguidoraSuperior: string;
   barraSeguidoraMedio: string;
   barraSeguidoraInferior: string;
+  barraSeguidora2Superior?: string;
+  barraSeguidora2Medio?: string;
+  barraSeguidora2Inferior?: string;
   barraPatéraSuperior: string;
   barraPatéraMedio: string;
   barraPatéraInferior: string;

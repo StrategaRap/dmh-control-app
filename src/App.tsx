@@ -6,6 +6,7 @@ import { SteelChangeForm } from './components/SteelChangeForm';
 import { AnalystForm } from './components/AnalystForm';
 import { MeasurementForm } from './components/MeasurementForm';
 import { DEFAULT_API_URL } from './constants';
+import { LogbookForm } from './components/LogbookForm';
 import {
     getLocalShiftReports,
     getLocalSteelChanges,
@@ -129,7 +130,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ onSave, onBack }) => {
 };
 
 function AppContent() {
-    const [view, setView] = useState<'shift' | 'steel' | 'settings' | 'analyst' | 'measurement'>('shift');
+    const [view, setView] = useState<'shift' | 'steel' | 'settings' | 'analyst' | 'measurement' | 'events'>('shift');
     const [isOnline, setIsOnline] = useState(true);
     const [pendingCount, setPendingCount] = useState(0);
 
@@ -254,11 +255,11 @@ function AppContent() {
 
     return (
         <div className="min-h-screen bg-slate-100 font-sans pb-10">
-            {view !== 'analyst' && view !== 'measurement' && <Header isOnline={isOnline} />}
+            {view !== 'analyst' && view !== 'measurement' && view !== 'events' && <Header isOnline={isOnline} />}
 
-            <main className={view === 'analyst' || view === 'measurement' ? '' : 'max-w-4xl mx-auto p-4 md:p-6'}>
+            <main className={view === 'analyst' || view === 'measurement' || view === 'events' ? '' : 'max-w-4xl mx-auto p-4 md:p-6'}>
 
-                {view !== 'analyst' && view !== 'measurement' && pendingCount > 0 && (
+                {view !== 'analyst' && view !== 'measurement' && view !== 'events' && pendingCount > 0 && (
                     <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl shadow-sm mb-6 flex flex-col sm:flex-row justify-between items-center text-amber-900 animate-in fade-in slide-in-from-top-4">
                         <div className="flex items-center mb-3 sm:mb-0">
                             <AlertTriangle className="w-5 h-5 mr-2 text-amber-600" />
@@ -277,7 +278,7 @@ function AppContent() {
                     </div>
                 )}
 
-                {view !== 'analyst' && view !== 'measurement' && (
+                {view !== 'analyst' && view !== 'measurement' && view !== 'events' && (
                     <div className="flex justify-end mb-4">
                         <button
                             onClick={() => setView(view === 'settings' ? 'shift' : 'settings')}
@@ -294,6 +295,7 @@ function AppContent() {
                         onNavigateToSteel={() => setView('steel')}
                         onNavigateToAnalyst={() => setView('analyst')}
                         onNavigateToMeasurement={() => setView('measurement')}
+                        onNavigateToEvents={() => setView('events')}
                     />
                 )}
 
@@ -311,6 +313,12 @@ function AppContent() {
 
                 {view === 'measurement' && (
                     <MeasurementForm
+                        onBack={() => setView('shift')}
+                    />
+                )}
+
+                {view === 'events' && (
+                    <LogbookForm
                         onBack={() => setView('shift')}
                     />
                 )}

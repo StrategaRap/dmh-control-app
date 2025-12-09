@@ -111,7 +111,7 @@ const EventListView: React.FC<{
             <div className="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-40 shadow-sm">
                 <div className="max-w-4xl mx-auto flex justify-between items-center">
                     <div>
-                        <h1 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Bitácora</h1>
+                        <h1 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Eventos</h1>
                         <p className="text-xs text-slate-400 mt-1">Registro de eventos e incidentes</p>
                     </div>
                     <button

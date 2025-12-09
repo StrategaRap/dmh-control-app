@@ -21,6 +21,9 @@ export const MeasurementForm: React.FC<MeasurementFormProps> = ({ onBack }) => {
     barraSeguidoraSuperior: '',
     barraSeguidoraMedio: '',
     barraSeguidoraInferior: '',
+    barraSeguidora2Superior: '',
+    barraSeguidora2Medio: '',
+    barraSeguidora2Inferior: '',
     barraPatéraSuperior: '',
     barraPatéraMedio: '',
     barraPatéraInferior: '',
@@ -86,6 +89,9 @@ export const MeasurementForm: React.FC<MeasurementFormProps> = ({ onBack }) => {
         barraSeguidoraSuperior: '',
         barraSeguidoraMedio: '',
         barraSeguidoraInferior: '',
+        barraSeguidora2Superior: '',
+        barraSeguidora2Medio: '',
+        barraSeguidora2Inferior: '',
         barraPatéraSuperior: '',
         barraPatéraMedio: '',
         barraPatéraInferior: '',
@@ -214,11 +220,66 @@ export const MeasurementForm: React.FC<MeasurementFormProps> = ({ onBack }) => {
             </div>
           </div>
 
+          {/* Barra Seguidora 2 (Solo para 111 y 112) */}
+          {(formData.drillId === '111' || formData.drillId === '112') && (
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+              <div className="bg-slate-50 border-b border-slate-200 px-5 py-3 flex items-center">
+                <div className="bg-blue-100 p-1.5 rounded-lg mr-3">
+                  <span className="text-sm font-bold text-blue-600">2</span>
+                </div>
+                <h3 className="text-sm font-black text-slate-700 uppercase tracking-wide">Barra Seguidora</h3>
+              </div>
+              <div className="p-5 grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                    Superior (pulg)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    placeholder="0.0"
+                    className="w-full border-slate-300 bg-white border p-3 rounded-lg shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    value={formData.barraSeguidora2Superior}
+                    onChange={e => handleInputChange('barraSeguidora2Superior', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                    Medio (pulg)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    placeholder="0.0"
+                    className="w-full border-slate-300 bg-white border p-3 rounded-lg shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    value={formData.barraSeguidora2Medio}
+                    onChange={e => handleInputChange('barraSeguidora2Medio', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                    Inferior (pulg)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    placeholder="0.0"
+                    className="w-full border-slate-300 bg-white border p-3 rounded-lg shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    value={formData.barraSeguidora2Inferior}
+                    onChange={e => handleInputChange('barraSeguidora2Inferior', e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Barra Patera */}
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="bg-slate-50 border-b border-slate-200 px-5 py-3 flex items-center">
               <div className="bg-green-100 p-1.5 rounded-lg mr-3">
-                <span className="text-sm font-bold text-green-600">2</span>
+                <span className="text-sm font-bold text-green-600">
+                  {(formData.drillId === '111' || formData.drillId === '112') ? '3' : '2'}
+                </span>
               </div>
               <h3 className="text-sm font-black text-slate-700 uppercase tracking-wide">Barra Patera</h3>
             </div>
@@ -269,7 +330,9 @@ export const MeasurementForm: React.FC<MeasurementFormProps> = ({ onBack }) => {
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="bg-slate-50 border-b border-slate-200 px-5 py-3 flex items-center">
               <div className="bg-purple-100 p-1.5 rounded-lg mr-3">
-                <span className="text-sm font-bold text-purple-600">3</span>
+                <span className="text-sm font-bold text-purple-600">
+                  {(formData.drillId === '111' || formData.drillId === '112') ? '4' : '3'}
+                </span>
               </div>
               <h3 className="text-sm font-black text-slate-700 uppercase tracking-wide">Adaptador Inferior</h3>
             </div>

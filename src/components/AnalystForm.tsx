@@ -98,18 +98,18 @@ export const AnalystForm: React.FC<AnalystFormProps> = ({ onBack }) => {
               <p className="text-sm text-slate-500">Rendimiento y vida útil de componentes.</p>
             </button>
 
-            {/* Botón 4: Bitácora */}
+            {/* Botón 4: Bitácora (DESHABILITADO) */}
             <button
-              onClick={() => setView('logbook')}
-              className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md hover:border-brand-primary/50 transition-all group text-left"
+              disabled={true}
+              className="bg-slate-50 p-8 rounded-2xl shadow-none border border-slate-100 opacity-60 cursor-not-allowed text-left grayscale"
             >
-              <div className="bg-amber-100 w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <div className="w-6 h-6 border-2 border-amber-600 rounded flex items-center justify-center">
-                  <div className="w-3 h-0.5 bg-amber-600"></div>
+              <div className="bg-slate-200 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
+                <div className="w-6 h-6 border-2 border-slate-400 rounded flex items-center justify-center">
+                  <div className="w-3 h-0.5 bg-slate-400"></div>
                 </div>
               </div>
-              <h3 className="text-xl font-black text-slate-800 mb-2">Bitácora</h3>
-              <p className="text-sm text-slate-500">Historial de eventos,  compromisos y comentarios.</p>
+              <h3 className="text-xl font-black text-slate-400 mb-2">Bitácora</h3>
+              <p className="text-sm text-slate-400">Deshabilitado: Acceder desde menú principal.</p>
             </button>
           </div>
         </main>

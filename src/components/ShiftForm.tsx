@@ -4,7 +4,7 @@ import { ShiftType, TerrainType, Diameter } from '../types';
 import { DRILL_OPTIONS, DIAMETER_OPTIONS, generateUUID, DEFAULT_API_URL } from '../constants';
 import { saveOperatorName, getSavedOperatorName, saveShiftReportLocally, getSavedScriptUrl, markShiftReportAsSynced } from '../services/storageService';
 import { HoleRow } from './HoleRow';
-import { PlusCircle, Save, Wrench, FileText, Activity, AlertCircle, Ruler } from 'lucide-react';
+import { PlusCircle, Save, Wrench, FileText, Activity, AlertCircle, Ruler, Calendar } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import { uploadDataToSheet } from '../services/googleScriptService';
 
@@ -12,6 +12,7 @@ interface ShiftFormProps {
   onNavigateToSteel: () => void;
   onNavigateToAnalyst: () => void;
   onNavigateToMeasurement: () => void;
+  onNavigateToEvents: () => void;
 }
 
 const getCurrentTime = () => {
@@ -19,7 +20,7 @@ const getCurrentTime = () => {
   return now.toTimeString().slice(0, 5);
 };
 
-export const ShiftForm: React.FC<ShiftFormProps> = ({ onNavigateToSteel, onNavigateToAnalyst, onNavigateToMeasurement }) => {
+export const ShiftForm: React.FC<ShiftFormProps> = ({ onNavigateToSteel, onNavigateToAnalyst, onNavigateToMeasurement, onNavigateToEvents }) => {
   const [rememberMe, setRememberMe] = useState(false);
   const [isSummarizing, setIsSummarizing] = useState(false);
 
@@ -479,6 +480,14 @@ export const ShiftForm: React.FC<ShiftFormProps> = ({ onNavigateToSteel, onNavig
         >
           <Ruler className="w-5 h-5 mb-1 md:mb-0" />
           <span className="text-[10px] md:text-sm uppercase tracking-wide">Medición Aceros</span>
+        </button>
+
+        <button
+          onClick={onNavigateToEvents}
+          className="flex flex-col md:flex-row items-center justify-center md:space-x-2 text-slate-500 font-bold px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors flex-shrink-0"
+        >
+          <Calendar className="w-5 h-5 mb-1 md:mb-0" />
+          <span className="text-[10px] md:text-sm uppercase tracking-wide">Eventos</span>
         </button>
 
         <button

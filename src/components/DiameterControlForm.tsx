@@ -66,6 +66,9 @@ const calculateDrillStatus = (drillId: string, measurements: MeasurementData[]):
         parseDecimal(lastMeasurement.barraSeguidoraSuperior),
         parseDecimal(lastMeasurement.barraSeguidoraMedio),
         parseDecimal(lastMeasurement.barraSeguidoraInferior),
+        parseDecimal(lastMeasurement.barraSeguidora2Superior),
+        parseDecimal(lastMeasurement.barraSeguidora2Medio),
+        parseDecimal(lastMeasurement.barraSeguidora2Inferior),
         parseDecimal(lastMeasurement.barraPatéraSuperior),
         parseDecimal(lastMeasurement.barraPatéraMedio),
         parseDecimal(lastMeasurement.barraPatéraInferior),
@@ -198,6 +201,33 @@ const DrillDetailView: React.FC<{
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Barra Seguidora 2 (Solo 111 y 112) */}
+                            {is111or112 && (
+                                <div>
+                                    <h4 className="text-xs font-bold text-blue-600 uppercase mb-3">Barra Seguidora 2</h4>
+                                    <div className="grid grid-cols-3 gap-4">
+                                        <div className="bg-slate-50 p-3 rounded-lg">
+                                            <p className="text-[10px] text-slate-400 uppercase mb-1">Superior</p>
+                                            <p className={`text-xl font-bold ${getValueColor(parseDecimal(lastMeasurement.barraSeguidora2Superior))}`}>
+                                                {parseDecimal(lastMeasurement.barraSeguidora2Superior) || '-'}"
+                                            </p>
+                                        </div>
+                                        <div className="bg-slate-50 p-3 rounded-lg">
+                                            <p className="text-[10px] text-slate-400 uppercase mb-1">Medio</p>
+                                            <p className={`text-xl font-bold ${getValueColor(parseDecimal(lastMeasurement.barraSeguidora2Medio))}`}>
+                                                {parseDecimal(lastMeasurement.barraSeguidora2Medio) || '-'}"
+                                            </p>
+                                        </div>
+                                        <div className="bg-slate-50 p-3 rounded-lg">
+                                            <p className="text-[10px] text-slate-400 uppercase mb-1">Inferior</p>
+                                            <p className={`text-xl font-bold ${getValueColor(parseDecimal(lastMeasurement.barraSeguidora2Inferior))}`}>
+                                                {parseDecimal(lastMeasurement.barraSeguidora2Inferior) || '-'}"
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Barra Patera */}
                             <div>
