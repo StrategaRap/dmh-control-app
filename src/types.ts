@@ -70,6 +70,10 @@ export interface ShiftReportData {
   holes: HoleRecord[];
   status: 'draft' | 'synced' | 'pending';
   aiSummary?: string;
+  isReporteTotal?: boolean;
+  totalWells?: number;
+  metersPerWell?: number;
+  totalReportObservations?: string;
 }
 
 export interface SteelChangeData {

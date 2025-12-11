@@ -162,3 +162,29 @@ export const markMeasurementAsSynced = (id: string) => {
   );
   safeStorage.setItem(MEASUREMENTS_KEY, JSON.stringify(updated));
 };
+
+// --- DRAFT STORAGE (AUTOSAVE) ---
+const DRAFT_REPORT_KEY = 'draft_shift_report';
+
+export const saveDraftReport = (report: ShiftReportData) => {
+  safeStorage.setItem(DRAFT_REPORT_KEY, JSON.stringify(report));
+};
+
+export const getDraftReport = (): ShiftReportData | null => {
+  try {
+    const data = safeStorage.getItem(DRAFT_REPORT_KEY);
+    if (!data) return null;
+    return JSON.parse(data);
+  } catch (e) {
+    return null;
+  }
+};
+
+export const clearDraftReport = () => {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    window.localStorage.removeItem(DRAFT_REPORT_KEY);
+  }
+  // Also clear from memory if used
+  // (safeStorage doesn't expose removeItem directly but we can overwrite)
+  safeStorage.setItem(DRAFT_REPORT_KEY, "");
+};

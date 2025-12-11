@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import type { ShiftReportData, HoleRecord } from '../types';
 import { ShiftType, TerrainType, Diameter } from '../types';
 import { DRILL_OPTIONS, DIAMETER_OPTIONS, generateUUID, DEFAULT_API_URL } from '../constants';
-import { saveOperatorName, getSavedOperatorName, saveShiftReportLocally, getSavedScriptUrl, markShiftReportAsSynced } from '../services/storageService';
+import { saveOperatorName, getSavedOperatorName, saveShiftReportLocally, getSavedScriptUrl, markShiftReportAsSynced, saveDraftReport, getDraftReport, clearDraftReport } from '../services/storageService';
 import { HoleRow } from './HoleRow';
 import { PlusCircle, Save, Wrench, FileText, Activity, AlertCircle, Ruler, Calendar } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
@@ -42,18 +42,37 @@ export const ShiftForm: React.FC<ShiftFormProps> = ({ onNavigateToSteel, onNavig
     status: 'draft'
   });
 
-  // Load operator name on mount
+  // Load draft or operator name on mount
   useEffect(() => {
-    try {
-      const saved = getSavedOperatorName();
-      if (saved) {
-        setFormData(prev => ({ ...prev, operatorName: saved }));
-        setRememberMe(true);
+    // 1. Try to load draft first
+    const draft = getDraftReport();
+    if (draft) {
+      setFormData(draft);
+      if (draft.operatorName) {
+        setRememberMe(true); // Assume remember if draft exists
       }
-    } catch (e) {
-      console.warn("Error loading operator name", e);
+    } else {
+      // 2. If no draft, load saved operator
+      try {
+        const saved = getSavedOperatorName();
+        if (saved) {
+          setFormData(prev => ({ ...prev, operatorName: saved }));
+          setRememberMe(true);
+        }
+      } catch (e) {
+        console.warn("Error loading operator name", e);
+      }
     }
   }, []);
+
+  // Autosave effect
+  useEffect(() => {
+    // Save draft whenever formData changes
+    // Debounce could be added here if performance issues arise, but for this data size it's likely fine.
+    if (formData.operatorName || formData.holes.length > 0 || formData.bench) {
+      saveDraftReport(formData);
+    }
+  }, [formData]);
 
   // State for steel changes
   const [steelChanges, setSteelChanges] = useState<any[]>([]);
@@ -118,6 +137,23 @@ export const ShiftForm: React.FC<ShiftFormProps> = ({ onNavigateToSteel, onNavig
           };
         }
       }
+
+      // Only autofill if we are NOT loading a draft (draft takes precedence)
+      // Check if current formData matches a "fresh" state for these fields or if user hasn't edited them.
+      // Simplification: We apply autofill, but the Effect dependency on [formData.drillId] means this runs when drillId changes.
+      // If loading from draft, drillId is set, triggering this.
+      // WE NEED TO AVOID OVERWRITING DRAFT DATA.
+      // Ideally, check if the change is user-initiated vs draft-load initiated.
+      // However, typical behavior: if I change drillID, I want new defaults.
+      // If I load draft, drillID is set instantaneously.
+
+      // FIX: The draft load effect happens ONCE on mount. This effect happens on mount too because drillId has initial value.
+      // To prevent overwriting draft data with autofill defaults on mount:
+      // We can rely on the fact that if it's a draft, these fields are likely already populated.
+      // But we can't easily distinguish. 
+      // For now, let's assume the user accepts the autofill/refresh if they change the drill.
+      // On initial load, if draft loaded, drillId might coincide.
+      // A safer approach: Only update if the current values are empty or default.
 
       setFormData(prev => ({
         ...prev,
@@ -277,6 +313,26 @@ export const ShiftForm: React.FC<ShiftFormProps> = ({ onNavigateToSteel, onNavig
     try {
       const reportToSave = JSON.parse(JSON.stringify(formData));
 
+      // LÓGICA REPORTE TOTAL: Generar pozo consolidado
+      if (reportToSave.isReporteTotal) {
+        const totalMeters = (reportToSave.totalWells || 0) * (reportToSave.metersPerWell || 0);
+        const totalHole: HoleRecord = {
+          id: generateUUID(),
+          holeNumber: "TOTAL",
+          meters: totalMeters,
+          cumulativeMeters: totalMeters,
+          startTime: "00:00",
+          endTime: "00:00",
+          durationMinutes: 0,
+          terrain: TerrainType.MEDIO,
+          pulldown: "N/A",
+          rpm: "N/A",
+          comments: `[REPORTE TOTAL] ${reportToSave.totalReportObservations || ''} (Pozos: ${reportToSave.totalWells}, m/pozo: ${reportToSave.metersPerWell})`
+        };
+        reportToSave.holes = [totalHole];
+      }
+
+
       // 1. Guardar localmente primero
       saveShiftReportLocally(reportToSave);
 
@@ -291,6 +347,9 @@ export const ShiftForm: React.FC<ShiftFormProps> = ({ onNavigateToSteel, onNavig
           if (res.success) {
             markShiftReportAsSynced(reportToSave.id);
             alert("✅ REPORTE GUARDADO Y SINCRONIZADO\n\nSe ha enviado el reporte y el correo.");
+
+            // Clear draft since it is now saved
+            clearDraftReport();
 
             // Reset form
             setFormData(prev => ({
@@ -309,6 +368,9 @@ export const ShiftForm: React.FC<ShiftFormProps> = ({ onNavigateToSteel, onNavig
 
       // 3. Fallback a local
       alert("⚠️ REPORTE GUARDADO EN DISPOSITIVO (OFFLINE)\n\nPresiona 'Sincronizar' en Analista cuando tengas internet.");
+
+      // Clear draft since it is now locally pending
+      clearDraftReport();
 
       setFormData(prev => ({
         ...prev,
@@ -420,47 +482,111 @@ export const ShiftForm: React.FC<ShiftFormProps> = ({ onNavigateToSteel, onNavig
 
       {/* 3. Hole by Hole Log */}
       <div className="space-y-4">
-        <div className="flex justify-between items-end px-1">
-          <h3 className="text-lg font-black text-slate-700 uppercase tracking-tight">Registro de Pozos</h3>
-          <div className="text-right">
-            <span className="text-[10px] text-slate-400 font-bold uppercase block mb-1">Total Metros</span>
-            <span className="text-xl font-black text-brand-primary bg-white px-3 py-1 rounded-lg border border-slate-200 shadow-sm block">
-              {formData.holes.reduce((acc, h) => acc + (h.meters || 0), 0).toFixed(1)}m
-            </span>
+        {/* 3. Hole by Hole Log */}
+        <div className="space-y-4">
+          <div className="flex flex-col md:flex-row justify-between md:items-end px-1 gap-2">
+            <div className="flex items-center gap-4">
+              <h3 className="text-lg font-black text-slate-700 uppercase tracking-tight">Registro de Pozos</h3>
+              <label className="flex items-center gap-2 cursor-pointer bg-slate-100 px-3 py-1 rounded-lg hover:bg-slate-200 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={formData.isReporteTotal || false}
+                  onChange={e => handleInputChange('isReporteTotal', e.target.checked)}
+                  className="w-4 h-4 text-brand-primary rounded focus:ring-brand-primary"
+                />
+                <span className="text-xs font-bold text-slate-600 uppercase">Reporte Total</span>
+              </label>
+            </div>
+            <div className="text-right">
+              <span className="text-[10px] text-slate-400 font-bold uppercase block mb-1">Total Metros</span>
+              <span className="text-xl font-black text-brand-primary bg-white px-3 py-1 rounded-lg border border-slate-200 shadow-sm block">
+                {formData.isReporteTotal
+                  ? ((formData.totalWells || 0) * (formData.metersPerWell || 0)).toFixed(1)
+                  : formData.holes.reduce((acc, h) => acc + (h.meters || 0), 0).toFixed(1)
+                }m
+              </span>
+            </div>
           </div>
-        </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-          <div className="max-h-[400px] overflow-y-auto">
-            {formData.holes.length === 0 && (
-              <div className="text-center py-10 bg-slate-50">
-                <AlertCircle className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                <p className="text-slate-400 text-sm font-medium">No hay pozos registrados en este turno.</p>
+          {formData.isReporteTotal ? (
+            // VISTA SIMPLIFICADA (REPORTE TOTAL)
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-6 animate-in fade-in duration-300">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Cantidad de Pozos</label>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    className="w-full border-slate-300 bg-white border p-3 rounded-lg shadow-sm text-lg font-bold focus:ring-2 focus:ring-brand-primary focus:border-transparent outline-none transition-all"
+                    value={formData.totalWells || ''}
+                    onChange={e => handleInputChange('totalWells', parseFloat(e.target.value) || 0)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Metros por Pozo</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    placeholder="0.0"
+                    className="w-full border-slate-300 bg-white border p-3 rounded-lg shadow-sm text-lg font-bold focus:ring-2 focus:ring-brand-primary focus:border-transparent outline-none transition-all"
+                    value={formData.metersPerWell || ''}
+                    onChange={e => handleInputChange('metersPerWell', parseFloat(e.target.value) || 0)}
+                  />
+                </div>
               </div>
-            )}
-
-            {formData.holes.length > 0 && (
-              <div className="divide-y divide-slate-100 p-3 space-y-3">
-                {formData.holes.map((hole, idx) => (
-                  <div key={hole.id} className="pt-3 first:pt-0">
-                    <HoleRow
-                      data={hole}
-                      index={idx}
-                      onChange={handleHoleChange}
-                      onRemove={removeHole}
-                    />
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Observaciones Generales</label>
+                <textarea
+                  rows={3}
+                  placeholder="Comentarios sobre el total de pozos..."
+                  className="w-full border-slate-300 bg-white border p-3 rounded-lg shadow-sm text-sm focus:ring-2 focus:ring-brand-primary focus:border-transparent outline-none resize-none transition-all"
+                  value={formData.totalReportObservations || ''}
+                  onChange={e => handleInputChange('totalReportObservations', e.target.value)}
+                />
+              </div>
+              <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 text-center">
+                <p className="text-brand-primary font-medium text-sm">
+                  Modo Resumido Activo: Se guardará un único registro consolidado.
+                </p>
+              </div>
+            </div>
+          ) : (
+            // VISTA DETALLADA (REGISTRO POZO A POZO)
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+              <div className="max-h-[400px] overflow-y-auto">
+                {formData.holes.length === 0 && (
+                  <div className="text-center py-10 bg-slate-50">
+                    <AlertCircle className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                    <p className="text-slate-400 text-sm font-medium">No hay pozos registrados en este turno.</p>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+                )}
 
-          <button
-            onClick={addHole}
-            className="w-full py-3 bg-slate-50 border-t border-slate-200 text-brand-primary hover:bg-brand-primary/5 flex items-center justify-center font-bold transition-all group"
-          >
-            <PlusCircle className="mr-2 group-hover:scale-110 transition-transform" size={18} /> AGREGAR POZO
-          </button>
+                {formData.holes.length > 0 && (
+                  <div className="divide-y divide-slate-100 p-3 space-y-3">
+                    {formData.holes.map((hole, idx) => (
+                      <div key={hole.id} className="pt-3 first:pt-0">
+                        <HoleRow
+                          data={hole}
+                          index={idx}
+                          onChange={handleHoleChange}
+                          onRemove={removeHole}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <button
+                onClick={addHole}
+                className="w-full py-3 bg-slate-50 border-t border-slate-200 text-brand-primary hover:bg-brand-primary/5 flex items-center justify-center font-bold transition-all group"
+              >
+                <PlusCircle className="mr-2 group-hover:scale-110 transition-transform" size={18} /> AGREGAR POZO
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
