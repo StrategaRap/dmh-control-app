@@ -591,46 +591,46 @@ export const ShiftForm: React.FC<ShiftFormProps> = ({ onNavigateToSteel, onNavig
       </div>
 
       {/* Actions */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-3 flex justify-between items-center z-50 shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.1)] gap-2">
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 md:px-4 py-2 md:py-3 flex justify-between items-stretch z-50 shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.1)] gap-1 md:gap-2">
         <button
           onClick={onNavigateToSteel}
-          className="flex flex-col md:flex-row items-center justify-center md:space-x-2 text-slate-500 font-bold px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors flex-shrink-0"
+          className="flex-1 min-w-0 flex flex-col md:flex-row items-center justify-center md:space-x-2 text-slate-500 font-bold px-1 md:px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors"
         >
-          <Wrench className="w-5 h-5 mb-1 md:mb-0" />
-          <span className="text-[10px] md:text-sm uppercase tracking-wide">Cambio Aceros</span>
+          <Wrench className="w-5 h-5 mb-1 md:mb-0 flex-shrink-0" />
+          <span className="text-[9px] md:text-sm uppercase tracking-wide text-center leading-none">Cambio<br className="md:hidden" />Aceros</span>
         </button>
 
         <button
           onClick={onNavigateToMeasurement}
-          className="flex flex-col md:flex-row items-center justify-center md:space-x-2 text-slate-500 font-bold px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors flex-shrink-0"
+          className="flex-1 min-w-0 flex flex-col md:flex-row items-center justify-center md:space-x-2 text-slate-500 font-bold px-1 md:px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors"
         >
-          <Ruler className="w-5 h-5 mb-1 md:mb-0" />
-          <span className="text-[10px] md:text-sm uppercase tracking-wide">Medición Aceros</span>
+          <Ruler className="w-5 h-5 mb-1 md:mb-0 flex-shrink-0" />
+          <span className="text-[9px] md:text-sm uppercase tracking-wide text-center leading-none">Medición<br className="md:hidden" />Aceros</span>
         </button>
 
         <button
           onClick={onNavigateToEvents}
-          className="flex flex-col md:flex-row items-center justify-center md:space-x-2 text-slate-500 font-bold px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors flex-shrink-0"
+          className="flex-1 min-w-0 flex flex-col md:flex-row items-center justify-center md:space-x-2 text-slate-500 font-bold px-1 md:px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors"
         >
-          <Calendar className="w-5 h-5 mb-1 md:mb-0" />
-          <span className="text-[10px] md:text-sm uppercase tracking-wide">Eventos</span>
+          <Calendar className="w-5 h-5 mb-1 md:mb-0 flex-shrink-0" />
+          <span className="text-[9px] md:text-sm uppercase tracking-wide text-center leading-none">Eventos</span>
         </button>
 
         <button
           onClick={onNavigateToAnalyst}
-          className="flex flex-col md:flex-row items-center justify-center md:space-x-2 text-slate-500 font-bold px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors flex-shrink-0"
+          className="flex-1 min-w-0 flex flex-col md:flex-row items-center justify-center md:space-x-2 text-slate-500 font-bold px-1 md:px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors"
         >
-          <FileText className="w-5 h-5 mb-1 md:mb-0" />
-          <span className="text-[10px] md:text-sm uppercase tracking-wide">Analista</span>
+          <FileText className="w-5 h-5 mb-1 md:mb-0 flex-shrink-0" />
+          <span className="text-[9px] md:text-sm uppercase tracking-wide text-center leading-none">Analista</span>
         </button>
 
         <button
           onClick={handleSave}
           disabled={isSummarizing}
-          className="flex items-center justify-center bg-brand-primary text-white font-bold px-6 py-3 rounded-lg shadow-lg hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02] active:scale-95 uppercase text-sm tracking-wide flex-grow md:flex-grow-0 md:w-auto"
+          className="flex-1 min-w-0 md:flex-none flex items-center justify-center bg-brand-primary text-white font-bold px-2 md:px-6 py-2 md:py-3 rounded-lg shadow-lg hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02] active:scale-95 uppercase text-xs md:text-sm tracking-wide"
         >
-          <Save className="mr-2 w-5 h-5" />
-          {isSummarizing ? 'Procesando...' : 'Guardar Registro'}
+          <Save className="mr-1 md:mr-2 w-5 h-5 flex-shrink-0" />
+          <span className="truncate">{isSummarizing ? '...' : <><span className="md:hidden">Guardar</span><span className="hidden md:inline">Guardar Registro</span></>}</span>
         </button>
       </div>
     </div>
