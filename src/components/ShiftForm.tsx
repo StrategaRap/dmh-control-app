@@ -590,6 +590,18 @@ export const ShiftForm: React.FC<ShiftFormProps> = ({ onNavigateToSteel, onNavig
         </div>
       </div>
 
+      {/* 4. Save Action - Moved from bottom bar */}
+      <div className="pt-4 pb-8">
+        <button
+          onClick={handleSave}
+          disabled={isSummarizing}
+          className="w-full flex items-center justify-center bg-[#FBBF24] text-slate-900 font-black px-6 py-6 rounded-3xl shadow-xl hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.01] active:scale-95 uppercase text-xl tracking-widest"
+        >
+          <Save className="mr-3 w-6 h-6 flex-shrink-0" />
+          <span>{isSummarizing ? 'Guardando...' : 'Guardar Registro'}</span>
+        </button>
+      </div>
+
       {/* Actions */}
       <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 md:px-4 py-2 md:py-3 flex justify-between items-stretch z-50 shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.1)] gap-1 md:gap-2">
         <button
@@ -624,14 +636,7 @@ export const ShiftForm: React.FC<ShiftFormProps> = ({ onNavigateToSteel, onNavig
           <span className="text-[9px] md:text-sm uppercase tracking-wide text-center leading-none">Analista</span>
         </button>
 
-        <button
-          onClick={handleSave}
-          disabled={isSummarizing}
-          className="flex-1 min-w-0 md:flex-none flex items-center justify-center bg-brand-primary text-white font-bold px-2 md:px-6 py-2 md:py-3 rounded-lg shadow-lg hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02] active:scale-95 uppercase text-xs md:text-sm tracking-wide"
-        >
-          <Save className="mr-1 md:mr-2 w-5 h-5 flex-shrink-0" />
-          <span className="truncate">{isSummarizing ? '...' : <><span className="md:hidden">Guardar</span><span className="hidden md:inline">Guardar Registro</span></>}</span>
-        </button>
+
       </div>
     </div>
   );

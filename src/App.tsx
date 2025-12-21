@@ -19,7 +19,7 @@ import {
     resetAllData
 } from './services/storageService';
 import { uploadDataToSheet } from './services/googleScriptService';
-import { CloudUpload, Settings, AlertTriangle, RefreshCw, Trash2 } from 'lucide-react';
+import { CloudUpload, AlertTriangle, RefreshCw, Trash2 } from 'lucide-react';
 
 // --- ERROR BOUNDARY COMPONENT ---
 // Clases de React son necesarias para capturar errores de renderizado (Pantalla Blanca)
@@ -278,17 +278,7 @@ function AppContent() {
                     </div>
                 )}
 
-                {view !== 'analyst' && view !== 'measurement' && view !== 'events' && (
-                    <div className="flex justify-end mb-4">
-                        <button
-                            onClick={() => setView(view === 'settings' ? 'shift' : 'settings')}
-                            className="text-slate-400 hover:text-brand-primary transition-colors p-2 bg-white rounded-lg shadow-sm border border-slate-200"
-                            title="Configuración"
-                        >
-                            <Settings size={20} />
-                        </button>
-                    </div>
-                )}
+
 
                 {view === 'shift' && (
                     <ShiftForm
@@ -308,6 +298,7 @@ function AppContent() {
                 {view === 'analyst' && (
                     <AnalystForm
                         onBack={() => setView('shift')}
+                        onNavigateToSettings={() => setView('settings')}
                     />
                 )}
 

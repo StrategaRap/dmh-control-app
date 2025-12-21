@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lock, ArrowLeft } from 'lucide-react';
+import { Lock, ArrowLeft, Settings } from 'lucide-react';
 import { InventoryForm } from './InventoryForm';
 import { DiameterControlForm } from './DiameterControlForm';
 import { LogbookForm } from './LogbookForm';
@@ -7,9 +7,10 @@ import { SteelStatisticsForm } from './SteelStatisticsForm';
 
 interface AnalystFormProps {
   onBack: () => void;
+  onNavigateToSettings: () => void;
 }
 
-export const AnalystForm: React.FC<AnalystFormProps> = ({ onBack }) => {
+export const AnalystForm: React.FC<AnalystFormProps> = ({ onBack, onNavigateToSettings }) => {
   const [view, setView] = useState<'login' | 'menu' | 'inventory' | 'diameters' | 'statistics' | 'logbook'>('login');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -110,6 +111,21 @@ export const AnalystForm: React.FC<AnalystFormProps> = ({ onBack }) => {
               </div>
               <h3 className="text-xl font-black text-slate-400 mb-2">Bitácora</h3>
               <p className="text-sm text-slate-400">Deshabilitado: Acceder desde menú principal.</p>
+            </button>
+
+            {/* Botón 5: Configuración (MOVIDO AQUÍ) */}
+            <button
+              onClick={onNavigateToSettings}
+              className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md hover:border-[#FBBF24]/50 transition-all group text-left relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 p-3 opacity-10">
+                <Settings className="w-24 h-24 text-[#FBBF24]" />
+              </div>
+              <div className="bg-yellow-50 w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform relative z-10">
+                <Settings className="w-6 h-6 text-[#FBBF24]" />
+              </div>
+              <h3 className="text-xl font-black text-slate-800 mb-2 relative z-10">Configuración</h3>
+              <p className="text-sm text-slate-500 relative z-10">Ajustes de conexión y sistema.</p>
             </button>
           </div>
         </main>
